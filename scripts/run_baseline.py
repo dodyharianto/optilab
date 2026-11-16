@@ -1,35 +1,30 @@
 from matplotlib import pyplot as plt
 from optilab.data import generate_locations
 from optilab.distance import calculate_distance_matrix
-from optilab.baseline import nearest_neighbor, calculate_route_distance
+from optilab.baseline import nearest_neighbor, two_opt, calculate_route_distance
+from optilab.visualize import visualize_routing
 
 def main():
     locations, labels = generate_locations()
     distance_matrix = calculate_distance_matrix(locations)
-    route = nearest_neighbor(distance_matrix)
-    total_distance = calculate_route_distance(route, distance_matrix)
 
-    print('Route: ', route)
-    print('Total distance needed: ', total_distance)
+    # nearest neighbor
+    nn_route = nearest_neighbor(distance_matrix)
+    nn_distance = calculate_route_distance(nn_route, distance_matrix)
 
-    plt.figure(figsize=(9, 7))
+    # 2-opt
+    two_opt_route, two_opt_distance = two_opt(nn_route, distance_matrix)
 
-    route_locations = locations[route]
-    plt.plot(route_locations[:, 0], route_locations[:, 1], marker='o', linestyle='-')
-    plt.scatter(locations[0, 0], locations[0, 1], marker='s', s=180, label='Depot')
-    plt.scatter(locations[1:, 0], locations[1:, 1], s=80, label='Customers')
+    print('Nearest neighbor route: ', nn_route)
+    print('Nearest neighbor total distance: ', nn_distance)
 
-    for i, (x, y) in enumerate(locations):
-        plt.annotate(labels[i], (x, y), xytext=(5, 5), textcoords='offset points')
+    print('Nearest neighbor + 2-opt route: ', two_opt_route)
+    print('Nearest neighbor + 2-opt total distance: ', two_opt_distance)
 
-    plt.title('OptiLab - Nearest Neighbor Routing')
-    plt.xlabel('X coordinate')
-    plt.ylabel('Y coordinate')
-    plt.legend()
-    plt.grid(alpha=0.3)
+    print('Improvement: ', 100 * (nn_distance - two_opt_distance) / nn_distance, '%')
 
-    plt.savefig('outputs/nearest_neighbor.png', dpi=150)
-    plt.show()
+    visualize_routing(locations, nn_route, labels, 'nearest_neighbor.png')
+    visualize_routing(locations, two_opt_route, labels, '2-opt.png')
 
 if __name__ == '__main__':
     main()
