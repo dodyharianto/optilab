@@ -18,7 +18,7 @@ def mixed_integer_lp(distance_matrix):
 
     # decision variables
     x = {
-        (i, j): model.add_variable(f'x_{i}{j}', cat='Binary')
+        (i, j): model.add_variable(f'x_{i}_{j}', cat='Binary')
         for i in range(n)
         for j in range(n)
         if i != j
